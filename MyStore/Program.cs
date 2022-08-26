@@ -33,10 +33,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
-app.MapDefaultControllerRoute();
 
 app.UseAuthorization();
 app.UseAuthentication();
+
+app.MapControllerRoute(
+    name: "pagination",
+    pattern: "Products/page{productPage}",
+    defaults: new {Controller = "Home", Action = "Index"});
+
+app.MapDefaultControllerRoute();
+
 
 #endregion
 
