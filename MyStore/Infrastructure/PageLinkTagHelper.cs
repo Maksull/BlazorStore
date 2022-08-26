@@ -25,6 +25,9 @@ namespace MyStore.Infrastructure
 
         public string? PageAction { get; set; }
 
+        [HtmlAttributeName(DictionaryAttributePrefix = "page-url-")]
+        public Dictionary<string, object> PageUrlValues { get; set; } = new();
+
         public bool PageClassesEnabled { get; set; } = false;
         public string PageClass { get; set; } = string.Empty;
         public string PageClassNormal { get; set; } = string.Empty;
@@ -40,14 +43,16 @@ namespace MyStore.Infrastructure
                 for(int i = 1; i <= PagingInfo.TotalPages; i++)
                 {
                     TagBuilder tag = new TagBuilder("a");
-                    tag.Attributes["href"] = urlHelper.Action(PageAction, new { productPage = i });
-                    tag.InnerHtml.Append(i.ToString());
-                    result.InnerHtml.AppendHtml(tag);
+                    PageUrlValues["ProductPage"] = i;
+                    tag.Attributes["href"] = urlHelper.Action(PageAction, PageUrlValues);
+                    
                     if (PageClassesEnabled)
                     {
                         tag.AddCssClass(PageClass);
                         tag.AddCssClass(i == PagingInfo.CurrentPage ? PageClassSelected : PageClassNormal);
                     }
+                    tag.InnerHtml.Append(i.ToString());
+                    result.InnerHtml.AppendHtml(tag);
                 }
                 output.Content.AppendHtml(result.InnerHtml);
             }

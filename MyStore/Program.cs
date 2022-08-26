@@ -17,6 +17,8 @@ builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
 builder.Services.AddScoped<ISupplierRepository, EFSupplierRepository>();
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 
 builder.Services.AddRazorPages();
 
@@ -34,12 +36,33 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseAuthorization();
 app.UseAuthentication();
 
+
+
+app.MapRazorPages();
+
+app.MapControllerRoute(
+    name: "categoryPage",
+    pattern: "{category}/Page{productPage:int}",
+    defaults: new {Controller = "Home", Action = "Index"});
+
+app.MapControllerRoute(
+    name: "page",
+    pattern: "Page{productPage:int}",
+    defaults: new {Controller = "Home", Action = "Index"});
+
+app.MapControllerRoute(
+    name: "category",
+    pattern: "{category}",
+    defaults: new {Controller = "Home", Action = "Index"});
+
 app.MapControllerRoute(
     name: "pagination",
-    pattern: "Products/page{productPage}",
+    pattern: "Products/page{productPage:int}",
     defaults: new {Controller = "Home", Action = "Index"});
 
 app.MapDefaultControllerRoute();
