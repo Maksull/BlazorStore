@@ -9,5 +9,7 @@ namespace MyStore.Models
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Supplier> Suppliers => Set<Supplier>();
+
+        public DbSet<Order> Orders => Set<Order>();
     }
 }

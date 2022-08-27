@@ -17,6 +17,7 @@ builder.Services.AddDbContext<MyStoreDataContext>(opts =>
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
 builder.Services.AddScoped<ISupplierRepository, EFSupplierRepository>();
+builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
 
 builder.Services.AddScoped<Cart>(sp => SessionCart.GetCart(sp));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
