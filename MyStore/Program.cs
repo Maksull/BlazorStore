@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyStore.Models;
+using MyStore.Models.Cart;
 using MyStore.Models.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,9 @@ builder.Services.AddDbContext<MyStoreDataContext>(opts =>
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
 builder.Services.AddScoped<ISupplierRepository, EFSupplierRepository>();
+
+builder.Services.AddScoped<Cart>(sp => SessionCart.GetCart(sp));
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
