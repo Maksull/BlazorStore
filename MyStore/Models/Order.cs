@@ -27,5 +27,8 @@ namespace MyStore.Models
         public string? Zip { get; set; }
 
         public bool GiftWrap { get; set; }
+
+        [BindNever]
+        public bool Shipped { get; set; }
     }
 }

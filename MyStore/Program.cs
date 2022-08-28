@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyStore.Models;
 using MyStore.Models.Cart;
@@ -14,6 +15,12 @@ builder.Services.AddDbContext<MyStoreDataContext>(opts =>
     opts.UseSqlServer(builder.Configuration["ConnectionStrings:MyStore"]);
 });
 
+builder.Services.AddDbContext<IdentityDataContext>(opts =>
+{
+    opts.UseSqlServer(builder.Configuration["ConnectionStrings:MyStoreIdentity"]);
+});
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityDataContext>();
+
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
 builder.Services.AddScoped<ISupplierRepository, EFSupplierRepository>();
@@ -26,6 +33,8 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
 builder.Services.AddRazorPages();
+
+builder.Services.AddServerSideBlazor();
 
 #endregion
 
@@ -43,10 +52,12 @@ app.UseStaticFiles();
 
 app.UseSession();
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 
+app.MapBlazorHub();
+//app.MapFallbackToPage("/admin/{*catchall}", "/admin/index");
 
 app.MapRazorPages();
 
@@ -76,5 +87,6 @@ app.MapDefaultControllerRoute();
 #endregion
 
 SeedData.EnsurePopulated(app);
+IdentitySeedData.EnsurePopulated(app);
 
 app.Run();
