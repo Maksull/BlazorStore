@@ -10,5 +10,22 @@
         }
 
         public IQueryable<Category> Categories => _context.Categories;
+
+        public async Task CreateCategory(Category category)
+        {
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteCategory(Category category)
+        {
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveCategory(Category category)
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -21,6 +21,7 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Description</th>
             <th>Category</th>
             <th>Supplier</th>
             <th>Price</th>
@@ -35,6 +36,7 @@
                 <tr class="@GetClass(p)">
                     <td>@p.ProductId</td>
                     <td>@p.Name</td>
+                    <td>@p.Description</td>
                     <td>@p.Category.Name</td>
                     <td>@p.Supplier.Name</td>
                     <td>@p.Price.ToString("c")</td>

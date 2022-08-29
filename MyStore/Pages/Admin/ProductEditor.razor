@@ -1,0 +1,105 @@
+﻿@page "/admin/products/edit/{id:long}"
+@page "/admin/products/create"
+
+<style>
+    div.validation-message { color: rgb(220, 53, 69); font-weight: 500 }
+</style>
+
+@if(Product != null){
+    <h3 class="bg-@ThemeColor text-white text-center p-1">@TitleText a Product</h3>
+    <EditForm Model="Product" OnValidSubmit="SaveProduct">
+        <DataAnnotationsValidator />
+        @if (Id == 0)
+        {
+            <div class="form-group">
+                <label>ID</label>
+                <input class="form-control" disabled value="@Product.ProductId" />
+            </div>
+        }
+        <div class="form-group">
+            <label>Name</label>
+            <ValidationMessage For="@(() => Product.Name)" />
+            <InputText class="form-control" @bind-Value="Product.Name" />
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <ValidationMessage For="@(() => Product.Description)" />
+            <InputText class="form-control" @bind-Value="Product.Description" />
+        </div>
+
+        <div class="form-group">
+            <label>Supplier</label>
+            <ValidationMessage For="@(() => Product.SupplierId)" />
+            <select @bind="Product.SupplierId" class="form-control">
+                <option selected disabled value="0">Choose a supplier</option>
+                @foreach (var supplier in Suppliers)
+                {
+                    <option value="@supplier.SupplierId">@supplier.Name</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <ValidationMessage For="@(() => Product.CategoryId)" />
+            <select @bind="Product.CategoryId" class="form-control">
+                <option selected disabled value="0">Choose a category</option>
+                @foreach (var category in Categories)
+                {
+                    <option value="@category.CategoryId">@category.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Price</label>
+            <ValidationMessage For="@(() => Product.Price)" />
+            <InputNumber class="form-control" @bind-Value="Product.Price" />
+        </div>
+
+        <div class="mt-2">
+            <button type="submit" class="btn btn-@ThemeColor">Save</button>
+            <NavLink class="btn btn-secondary" href="/admin/products">Cancel</NavLink>
+        </div>
+    </EditForm>
+}else {
+    <h1 class="bg-danger text-white text-center p-1">There is no Product with Id @Id</h1>
+}
+
+@code {
+    [Inject]
+    private MyStoreDataContext _context { get; set; }
+
+    [Inject]
+    public NavigationManager? NavigationManager {get; set;}
+
+    [Parameter]
+    public long Id { get; set; } = 0;
+
+    public Product? Product { get; set; } = new();
+
+    public IEnumerable<Category> Categories { get; set; } = Enumerable.Empty<Category>();
+    public IEnumerable<Supplier> Suppliers { get; set; } = Enumerable.Empty<Supplier>();
+
+    protected override void OnParametersSet()
+    {
+        if(Id != 0){
+            Product = _context.Products.Include(p => p.Category).Include(p => p.Supplier).FirstOrDefault(p => p.ProductId == Id);
+        }
+        Categories = _context.Categories.ToList();
+        Suppliers = _context.Suppliers.ToList();
+    }
+
+    public void SaveProduct()
+    {
+        if(Id == 0){
+            _context.Products.Add(Product);
+        }
+        _context.SaveChanges();
+        
+        NavigationManager?.NavigateTo("/admin/products");
+    }
+
+    public string ThemeColor => Id == 0 ? "primary" : "warning";
+    public string TitleText => Id == 0 ? "Create" : "Edit";
+}

@@ -1,0 +1,73 @@
+﻿@page "/admin/suppliers/edit/{id:long}"
+@page "/admin/suppliers/create"
+
+<style>
+    div.validation-message {
+        color: rgb(220, 53, 69);
+        font-weight: 500
+    }
+</style>
+
+@if(Supplier != null){
+    <h3 class="bg-@ThemeColor text-white text-center p-1">@TitleText a Supplier</h3>
+    <EditForm Model="Supplier" OnValidSubmit="SaveSupplier">
+        <DataAnnotationsValidator />
+        @if (Id == 0)
+        {
+            <div class="form-group">
+                <label>ID</label>
+                <input class="form-control" disabled value="@Supplier.SupplierId" />
+            </div>
+        }
+        <div class="form-group">
+            <label>Name</label>
+            <ValidationMessage For="@(() => Supplier.Name)" />
+            <InputText class="form-control" @bind-Value="Supplier.Name" />
+        </div>
+
+        <div class="form-group">
+            <label>City</label>
+            <ValidationMessage For="@(() => Supplier.City)" />
+            <InputText class="form-control" @bind-Value="Supplier.City" />
+        </div>
+    
+        <div class="mt-2">
+            <button type="submit" class="btn btn-@ThemeColor">Save</button>
+            <NavLink class="btn btn-secondary" href="/admin/suppliers">Cancel</NavLink>
+        </div>
+    </EditForm>
+}else {
+    <h1 class="bg-danger text-white text-center p-1">There is no Supplier with Id @Id</h1>
+}
+
+@code {
+    [Inject]
+    private ISupplierRepository _repository { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager {get; set;}
+
+    [Parameter]
+    public long Id { get; set; } = 0;
+
+    public Supplier? Supplier { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        if(Id != 0){
+            Supplier = _repository.Suppliers.FirstOrDefault(s => s.SupplierId == Id);
+        }
+    }
+
+    public void SaveSupplier(){
+        if(Id == 0){
+            _repository.CreateSupplier(Supplier);
+        }
+        _repository.SaveSupplier(Supplier);
+
+        NavigationManager.NavigateTo("/admin/suppliers");
+    }
+
+    public string ThemeColor => Id == 0 ? "primary" : "warning";
+    public string TitleText => Id == 0 ? "Create" : "Edit";
+}

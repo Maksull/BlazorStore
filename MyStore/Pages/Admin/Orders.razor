@@ -1,0 +1,117 @@
+﻿@page "/admin/orders"
+@inherits OwningComponentBase<IOrderRepository>
+
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th colspan="5" class="text-center">Unshipped orders</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (UnshippedOrders?.Count() > 0)
+        {
+            @foreach (Order o in UnshippedOrders)
+            {
+                <tr>
+                    <td>@o.Name</td>
+                    <td>@o.Zip</td>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <td>
+                        <button class="btn btn-sm btn-danger" @onclick="@(e => ShipOrder(o.OrderId))">
+                            Ship
+                        </button>
+                    </td>
+                </tr>
+                @foreach (CartLine line in o.Lines)
+                {
+                    <tr>
+                        <td colspan="2"></td>
+                        <td>@line.Product.Name</td>
+                        <td>@line.Quantity</td>
+                        <td></td>
+                    </tr>
+                }
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No Orders</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th colspan="5" class="text-center">Shipped orders</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ShippedOrders?.Count() > 0)
+        {
+            @foreach (Order o in ShippedOrders)
+            {
+                <tr>
+                    <td>@o.Name</td>
+                    <td>@o.Zip</td>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <td>
+                        <button class="btn btn-sm btn-danger" @onclick="@(e => ShipOrder(o.OrderId))">
+                            Ship
+                        </button>
+                    </td>
+                </tr>
+                @foreach (CartLine line in o.Lines)
+                {
+                    <tr>
+                        <td colspan="2"></td>
+                        <td>@line.Product.Name</td>
+                        <td>@line.Quantity</td>
+                        <td></td>
+                    </tr>
+                }
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No Orders</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private IOrderRepository _repository => Service;
+
+    public IEnumerable<Order> AllOrders { get; set; } = Enumerable.Empty<Order>();
+    public IEnumerable<Order> UnshippedOrders { get; set; } = Enumerable.Empty<Order>();
+    public IEnumerable<Order> ShippedOrders { get; set; } = Enumerable.Empty<Order>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await UpdateData();
+    }
+
+    public async Task UpdateData()
+    {
+        AllOrders = await _repository.Orders.ToListAsync();
+        UnshippedOrders = AllOrders.Where(o => !o.Shipped);
+        ShippedOrders = AllOrders.Where(o => o.Shipped);
+    }
+
+    public void ShipOrder(long id) => UpdateOrder(id, true);
+    public void ResetOrder(long id) => UpdateOrder(id, false);
+
+    private void UpdateOrder(long id, bool shipValue){
+        Order? order = _repository.Orders.FirstOrDefault(o => o.OrderId == id);
+        if(order != null){
+            order.Shipped = shipValue;
+            _repository.SaveOrder(order);
+        }
+    }
+}

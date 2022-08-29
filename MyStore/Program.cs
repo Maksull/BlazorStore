@@ -43,9 +43,9 @@ var app = builder.Build();
 
 #region App
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
-    //app.UseExceptionHandler();
+    app.UseExceptionHandler("Error");
 }
 
 app.UseStaticFiles();
@@ -57,7 +57,7 @@ app.UseAuthorization();
 
 
 app.MapBlazorHub();
-//app.MapFallbackToPage("/admin/{*catchall}", "/admin/index");
+app.MapFallbackToPage("/admin/{*catchall}", "/admin/index");
 
 app.MapRazorPages();
 
