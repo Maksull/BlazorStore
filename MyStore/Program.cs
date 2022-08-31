@@ -45,7 +45,7 @@ var app = builder.Build();
 
 if (app.Environment.IsProduction())
 {
-    app.UseExceptionHandler("Error");
+    app.UseExceptionHandler("/Error");
 }
 
 app.UseStaticFiles();
