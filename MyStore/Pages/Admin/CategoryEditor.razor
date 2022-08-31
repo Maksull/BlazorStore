@@ -1,0 +1,67 @@
+﻿@page "/admin/categories/edit/{id:long}"
+@page "/admin/categories/create"
+
+<style>
+    div.validation-message {
+        color: rgb(220, 53, 69);
+        font-weight: 500
+    }
+</style>
+
+@if(Category != null){
+    <h3 class="bg-@ThemeColor text-white text-center p-1">@TitleText a Category</h3>
+    <EditForm Model="Category" OnValidSubmit="SaveCategory">
+        <DataAnnotationsValidator />
+        @if (Id == 0)
+        {
+            <div class="form-group">
+                <label>ID</label>
+                <input class="form-control" disabled value="@Category.CategoryId" />
+            </div>
+        }
+        <div class="form-group">
+            <label>Name</label>
+            <ValidationMessage For="@(() => Category.Name)" />
+            <InputText class="form-control" @bind-Value="Category.Name" />
+        </div>
+    
+        <div class="mt-2">
+            <button type="submit" class="btn btn-@ThemeColor">Save</button>
+            <NavLink class="btn btn-secondary" href="/admin/categories">Cancel</NavLink>
+        </div>
+    </EditForm>
+}else {
+    <h1 class="bg-danger text-white text-center p-1">There is no Category with Id @Id</h1>
+}
+
+@code {
+    [Inject]
+    private ICategoryRepository _repository { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager {get; set;}
+
+    [Parameter]
+    public long Id { get; set; } = 0;
+
+    public Category? Category { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        if(Id != 0){
+            Category = _repository.Categories.FirstOrDefault(c => c.CategoryId == Id);
+        }
+    }
+
+    public void SaveCategory(){
+        if(Id == 0){
+            _repository.CreateCategory(Category);
+        }
+        _repository.SaveCategory(Category);
+
+        NavigationManager.NavigateTo("/admin/categories");
+    }
+
+    public string ThemeColor => Id == 0 ? "primary" : "warning";
+    public string TitleText => Id == 0 ? "Create" : "Edit";
+}

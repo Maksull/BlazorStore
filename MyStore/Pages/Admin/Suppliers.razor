@@ -1,0 +1,166 @@
+﻿@page "/admin/suppliers"
+@inherits OwningComponentBase<ISupplierRepository>
+
+<div class="mb-1">
+    <form class="form-inline" @onsubmit="Search">
+        <div class="input-group mb-2 mr-sm-2">
+            <input type="text" class="form-control" @bind="SelectedSearch" placeholder="Search" />
+            <div class="input-group-prepend">
+                <div class="input-group">
+                    <button type="submit" class="btn btn-secondary">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>City</th>
+            <th>Amount</th>
+            <td />
+        </tr>
+    </thead>
+    <tbody>
+        @if (SuppliersData?.Count() > 0) {
+            @foreach (Supplier s in SuppliersData) {
+                <tr class="@GetClass(s.City)">
+                    <td>@s.SupplierId</td>
+                    <td>@s.Name</td>
+                    <td>@s.City</td>
+                    <td>@s.Products.Count()</td>
+                    <td>
+                        <NavLink class="btn btn-info btn-sm" href="@GetDetailsUrl(s.SupplierId)">
+                            Details
+                        </NavLink>
+                        <NavLink class="btn btn-warning btn-sm" href="@GetEditUrl(s.SupplierId)">
+                            Edit
+                        </NavLink>
+                        <button class="btn btn-danger btn-sm" @onclick="@(e => DeleteSupplier(s))">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        } else {
+            <tr>
+                <td colspan="5" class="text-center">No Suppliers</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+<div class="container-fluid px-0 mb-2">
+    <div class="row">
+        <div class="col">
+            <EditForm Model="SelectedCity" OnValidSubmit="UpdateData">
+                <div class="form-group">
+                    <label>Highlighted City</label>
+                    <select @bind="SelectedCity" class="form-control">
+                        <option selected disabled value="0">Choose a city</option>
+                        <option value="0">Nothing</option>
+                        @foreach (var city in Cities)
+                        {
+                            <option selected="@(city == SelectedCity)">@city</option>
+                        }
+                    </select>
+                </div>
+            </EditForm>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label>Sort by</label>
+                <select @onchange="@Sort" class="form-control">
+                    <option selected disabled value="0">Choose a property</option>
+                    @foreach (var property in SupplierProperties)
+                    {
+                        if (property.PropertyType.FullName.Contains("MyStore.Models"))
+                        {
+                            <option value="@(property.Name+".Count()")">@property.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@property.Name">@property.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavLink class="btn btn-primary" href="/admin/suppliers/create">Create</NavLink>
+
+@code {
+    private ISupplierRepository _repository => Service;
+
+    public IEnumerable<Supplier> SuppliersData { get; set; } = Enumerable.Empty<Supplier>();
+    public IEnumerable<string> Cities { get; set; } = Enumerable.Empty<string>();
+
+    public string SelectedCity { get; set; } = string.Empty;
+    public string SelectedSort { get; set; } = "SupplierId";
+    public string SelectedSearch { get; set; } = string.Empty;
+
+    public List<PropertyInfo> SupplierProperties { get; set; } = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        SupplierProperties = new Supplier().GetType().GetProperties().ToList();
+
+        await UpdateData();
+    }
+
+    public async Task UpdateData()
+    {
+        SuppliersData = await _repository.Suppliers.Include(s => s.Products).ToListAsync();
+        Cities = _repository.Suppliers.Select(s => s.City);
+    }
+
+    public async Task DeleteSupplier(Supplier s){
+        await _repository.DeleteSupplier(s);
+        await UpdateData();
+    }
+
+    public void Sort(ChangeEventArgs e){
+        SelectedSort = e.Value as string;
+
+        if (SelectedSort.Contains("."))
+        {
+            var temp = SelectedSort.Split(new char[] { '.' }, 2);
+
+
+            if(temp[1].Contains("()"))
+            {
+                if (temp[1] == "Count()")
+                {
+                    temp[1] = "get_Count";
+                }
+                SuppliersData = SuppliersData.OrderBy(s => s.GetType().GetProperty(temp[0]).GetValue(s).GetType().GetMethod(temp[1]).
+                                    Invoke(s.GetType().GetProperty(temp[0]).GetValue(s), null));
+            }
+            else
+            {
+                SuppliersData = SuppliersData.OrderBy(s => s.GetType().GetProperty(temp[0]).GetValue(s).GetType().GetProperty(temp[1]).
+                                                            GetValue(s.GetType().GetProperty(temp[0]).GetValue(s)));
+            }
+        }
+        else
+        {
+            SuppliersData = SuppliersData.OrderBy(s => s.GetType().GetProperty(e.Value.ToString()).GetValue(s));
+        }
+    }
+
+    public void Search(){
+        SuppliersData = SuppliersData.Where(s => s.Name.Contains(SelectedSearch));
+    }
+
+    public string GetDetailsUrl(long id) => $"/admin/suppliers/details/{id}";
+    public string GetEditUrl(long id) => $"/admin/suppliers/edit/{id}";
+
+    public string GetClass(string city) => SelectedCity == city ? "bg-info text-white" : "";
+}

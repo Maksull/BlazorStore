@@ -1,0 +1,203 @@
+﻿@page "/admin"
+@page "/admin/products"
+@using Microsoft.AspNetCore.Mvc
+@inherits OwningComponentBase<IProductRepository>
+
+<div class="mb-1">
+    <form class="form-inline" @onsubmit="Search">
+        <div class="input-group mb-2 mr-sm-2">
+            <input type="text" class="form-control" @bind="SelectedSearch" placeholder="Search" />
+            <div class="input-group-prepend">
+                <div class="input-group">
+                    <button type="submit" class="btn btn-secondary">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Supplier</th>
+            <th>Price</th>
+            <td />
+        </tr>
+    </thead>
+    <tbody>
+        @if (ProductsData?.Count() > 0)
+        {
+            @foreach (Product p in ProductsData)
+            {
+                <tr class="@GetClass(p)">
+                    <td>@p.ProductId</td>
+                    <td>@p.Name</td>
+                    <td>@p.Description</td>
+                    <td>@p.Category.Name</td>
+                    <td>@p.Supplier.Name</td>
+                    <td>@p.Price.ToString("c")</td>
+                    <td>
+                        <NavLink class="btn btn-info btn-sm" href="@GetDetailsUrl(p.ProductId)">
+                            Details
+                        </NavLink>
+                        <NavLink class="btn btn-warning btn-sm" href="@GetEditUrl(p.ProductId)">
+                            Edit
+                        </NavLink>
+                        <button class="btn btn-danger btn-sm" @onclick="@(e => DeleteProduct(p))">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No Products</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="container-fluid px-0 mb-2">
+    <div class="row">
+        <div class="col">
+            <EditForm Model="SelectedCategory">
+                <div class="form-group">
+                    <label>Highlighted Category</label>
+                    <select @bind="SelectedCategory.CategoryId" class="form-control">
+                        <option selected disabled value="0">Choose a category</option>
+                        <option value="0">Nothing</option>
+                        @foreach (var category in Categories)
+                        {
+                            <option value="@category.CategoryId">@category.Name</option>
+                        }
+                    </select>
+                </div>
+            </EditForm>
+        </div>
+        <div class="col">
+            <EditForm Model="SelectedSupplier">
+                <div class="form-group">
+                    <label>Highlighted Supplier</label>
+                    <select @bind="SelectedSupplier.SupplierId" class="form-control">
+                        <option selected disabled value="0">Choose a supplier</option>
+                        <option value="0">Nothing</option>
+                        @foreach (var supplier in Suppliers)
+                        {
+                            <option value="@supplier.SupplierId">@supplier.Name</option>
+                        }
+                    </select>
+                </div>
+            </EditForm>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label>Sort by</label>
+                <select @onchange="@Sort" class="form-control">
+                    <option selected disabled value="0">Choose a property</option>
+                    <option value="ProductId">Nothing</option>
+                    @foreach (var property in ProductProperties)
+                    {
+                        if (property.PropertyType.FullName.Contains("MyStore.Models"))
+                        {
+                            <option value="@(property.Name+".Name")">@property.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@property.Name">@property.Name</option>
+
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<NavLink class="btn btn-primary" href="/admin/products/create">Create</NavLink>
+
+@code {
+    [Inject]
+    private MyStoreDataContext _context { get; set; }
+
+    public IEnumerable<Product> ProductsData { get; set; } = Enumerable.Empty<Product>();
+
+    public IEnumerable<Category> Categories { get; set; } = Enumerable.Empty<Category>();
+    public IEnumerable<Supplier> Suppliers { get; set; } = Enumerable.Empty<Supplier>();
+
+    public Category SelectedCategory { get; set; } = new();
+    public Supplier SelectedSupplier { get; set; } = new();
+    public string SelectedSort { get; set; } = "ProductId";
+    public string SelectedSearch { get; set; } = string.Empty;
+
+    public List<PropertyInfo> ProductProperties { get; set; } = new();
+    protected async override Task OnInitializedAsync()
+    {
+        ProductProperties = new Product().GetType().GetProperties().ToList();
+        ProductProperties.RemoveAll(p => p.Name.Contains("Id"));
+
+        await UpdateData();
+    }
+
+    public async Task UpdateData()
+    {
+        ProductsData = _context.Products.Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).ToList();
+
+        Categories = _context.Categories.ToList();
+        Suppliers = _context.Suppliers.ToList();
+    }
+
+    public async Task DeleteProduct(Product p)
+    {
+        _context.Products.Remove(p);
+        await _context.SaveChangesAsync();
+        await UpdateData();
+    }
+
+    public string GetDetailsUrl(long id) => $"/admin/products/details/{id}";
+    public string GetEditUrl(long id) => $"/admin/products/edit/{id}";
+
+    public string GetClass(Product p)
+    {
+        if ((SelectedCategory.CategoryId > 0 && SelectedSupplier.SupplierId == 0) || (SelectedCategory.CategoryId == 0 && SelectedSupplier.SupplierId > 0))
+        {
+            if (p.CategoryId == SelectedCategory.CategoryId || p.SupplierId == SelectedSupplier.SupplierId)
+            {
+                return "bg-info text-white";
+            }
+        }
+        else if (p.CategoryId == SelectedCategory.CategoryId && p.SupplierId == SelectedSupplier.SupplierId)
+        {
+            return "bg-info text-white";
+        }
+        return "";
+    }
+
+    public async void Sort(ChangeEventArgs e)
+    {
+        SelectedSort = e.Value as string;
+
+        if (SelectedSort.Contains("."))
+        {
+            var temp = SelectedSort.Split(new char[] { '.' }, 2);
+
+            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(temp[0]).GetValue(p).GetType().GetProperty(temp[1]).
+                                                            GetValue(p.GetType().GetProperty(temp[0]).GetValue(p)));
+        }
+        else
+        {
+            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(e.Value.ToString()).GetValue(p));
+        }
+    }
+
+    public void Search()
+    {
+        ProductsData = ProductsData.Where(p => p.Name.Contains(SelectedSearch));
+    }
+}

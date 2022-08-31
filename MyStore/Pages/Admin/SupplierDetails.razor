@@ -1,0 +1,54 @@
+﻿@page "/admin/suppliers/details/{id:long}"
+
+@if (Supplier != null)
+{
+        <h1 class="bg-secondary text-white text-center p-1">@Supplier?.Name</h1>
+        <table class="table table-sm table-bordered table-striped">
+            <tbody>
+            @if (Supplier?.Products?.Count() > 0)
+            {
+                @foreach (Product p in Supplier.Products)
+                {
+                    <tr>
+                        <td>@p.ProductId</td>
+                        <td>@p.Name</td>
+                        <td>@p.Category.Name</td>
+                        <td>@p.Supplier.Name</td>
+                        <td>@p.Price.ToString("c")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No Products</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+}
+else
+{
+        <h1 class="bg-danger text-white text-center p-1">There is no Category with Id @Id</h1>
+}
+
+<NavLink class="btn btn-warning" href="@GetEditUrl">Edit</NavLink>
+<NavLink class="btn btn-secondary" href="/admin/suppliers">Back</NavLink>
+
+
+@code {
+    [Inject]
+    private ISupplierRepository _repository { get; set; }
+
+    [Parameter]
+    public long Id { get; set; }
+
+    public Supplier? Supplier { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Supplier = _repository.Suppliers.Include(c => c.Products).ThenInclude(p => p.Category).FirstOrDefault(c => c.SupplierId == Id);
+    }
+
+    public string GetEditUrl => $"/admin/suppliers/edit/{Id}";
+}

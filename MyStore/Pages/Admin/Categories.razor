@@ -1,0 +1,141 @@
+﻿@page "/admin/categories"
+@inherits OwningComponentBase<ICategoryRepository>
+
+<div class="mb-1">
+    <form class="form-inline" @onsubmit="Search">
+        <div class="input-group mb-2 mr-sm-2">
+            <input type="text" class="form-control" @bind="SelectedSearch" placeholder="Search" />
+            <div class="input-group-prepend">
+                <div class="input-group">
+                    <button type="submit" class="btn btn-secondary">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <td />
+        </tr>
+    </thead>
+    <tbody>
+        @if (CategoriesData?.Count() > 0) {
+            @foreach (Category c in CategoriesData) {
+                <tr>
+                    <td>@c.CategoryId</td>
+                    <td>@c.Name</td>
+                    <td>@c.Products.Count()</td>
+                    <td>
+                        <NavLink class="btn btn-info btn-sm" href="@GetDetailsUrl(c.CategoryId)">
+                            Details
+                        </NavLink>
+                        <NavLink class="btn btn-warning btn-sm" href="@GetEditUrl(c.CategoryId)">
+                            Edit
+                        </NavLink>
+                        <button class="btn btn-danger btn-sm" @onclick="@(e => DeleteCategory(c))">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        } else {
+            <tr>
+                <td colspan="5" class="text-center">No Categories</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="container-fluid px-0 mb-2">
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label>Sort by</label>
+                <select @onchange="@Sort" class="form-control">
+                    <option selected disabled value="0">Choose a property</option>
+                    @foreach (var property in CategoryProperties)
+                    {
+                        if (property.PropertyType.FullName.Contains("MyStore.Models"))
+                        {
+                            <option value="@(property.Name+".Count()")">@property.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@property.Name">@property.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavLink class="btn btn-primary" href="/admin/categories/create">Create</NavLink>
+
+@code {
+    private ICategoryRepository _repository => Service;
+
+    public IEnumerable<Category> CategoriesData { get; set; } = Enumerable.Empty<Category>();
+
+    public List<PropertyInfo> CategoryProperties { get; set; } = new();
+    public string SelectedSearch { get; set; } = string.Empty;
+    public string SelectedSort { get; set; } = "CategoryId";
+
+    protected async override Task OnInitializedAsync()
+    {
+        CategoryProperties = new Category().GetType().GetProperties().ToList();
+
+        await UpdateData();
+    }
+
+    public async Task UpdateData()
+    {
+        CategoriesData = await _repository.Categories.Include(c => c.Products).ToListAsync();
+    }
+
+    public async Task DeleteCategory(Category c){
+        await _repository.DeleteCategory(c);
+        await UpdateData();
+    }
+
+    public void Search(){
+        CategoriesData = CategoriesData.Where(c => c.Name.Contains(SelectedSearch));
+    }
+
+    public void Sort(ChangeEventArgs e){
+        SelectedSort = e.Value as string;
+
+        if (SelectedSort.Contains("."))
+        {
+            var temp = SelectedSort.Split(new char[] { '.' }, 2);
+
+
+            if (temp[1].Contains("()"))
+            {
+                if (temp[1] == "Count()")
+                {
+                    temp[1] = "get_Count";
+                }
+                CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(temp[0]).GetValue(c).GetType().GetMethod(temp[1]).
+                                    Invoke(c.GetType().GetProperty(temp[0]).GetValue(c), null));
+            }
+            else
+            {
+                CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(temp[0]).GetValue(c).GetType().GetProperty(temp[1]).
+                                                            GetValue(c.GetType().GetProperty(temp[0]).GetValue(c)));
+            }
+        }
+        else
+        {
+            CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(e.Value.ToString()).GetValue(c));
+        }
+    }
+
+    public string GetDetailsUrl(long id) => $"/admin/categories/details/{id}";
+    public string GetEditUrl(long id) => $"/admin/categories/edit/{id}";
+}
