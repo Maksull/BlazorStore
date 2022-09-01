@@ -25,13 +25,16 @@ namespace MyStore.Tests
                 new Category { Name = "Three"}
             }).AsQueryable());
 
-            NavigationMenuViewComponent navigationMenu = new(mock.Object);
-            navigationMenu.ViewComponentContext = new(){
-                ViewContext = { RouteData = new Microsoft.AspNetCore.Routing.RouteData()}
+            NavigationMenuViewComponent navigationMenu = new(mock.Object)
+            {
+                ViewComponentContext = new()
+                {
+                    ViewContext = { RouteData = new Microsoft.AspNetCore.Routing.RouteData() }
+                }
             };
 
             //Action
-            string[] results = ((navigationMenu.Invoke() as ViewViewComponentResult)?.ViewData.Model as IEnumerable<string> ?? Enumerable.Empty<string>()).ToArray();
+            string[] results = ((navigationMenu.Invoke() as ViewViewComponentResult)?.ViewData?.Model as IEnumerable<string> ?? Enumerable.Empty<string>()).ToArray();
 
 
             //Assert
@@ -52,10 +55,12 @@ namespace MyStore.Tests
 
             }).AsQueryable());
 
-            NavigationMenuViewComponent navigationMenu = new(mock.Object);
-            navigationMenu.ViewComponentContext = new()
+            NavigationMenuViewComponent navigationMenu = new(mock.Object)
             {
-                ViewContext = { RouteData = new Microsoft.AspNetCore.Routing.RouteData() }
+                ViewComponentContext = new()
+                {
+                    ViewContext = { RouteData = new Microsoft.AspNetCore.Routing.RouteData() }
+                }
             };
 
             navigationMenu.RouteData.Values["category"] = selectedCategory;

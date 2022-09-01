@@ -29,7 +29,7 @@
                 <tr>
                     <td>@c.CategoryId</td>
                     <td>@c.Name</td>
-                    <td>@c.Products.Count()</td>
+                    <td>@c.Products?.Count()</td>
                     <td>
                         <NavLink class="btn btn-info btn-sm" href="@GetDetailsUrl(c.CategoryId)">
                             Details
@@ -60,7 +60,7 @@
                     <option selected disabled value="0">Choose a property</option>
                     @foreach (var property in CategoryProperties)
                     {
-                        if (property.PropertyType.FullName.Contains("MyStore.Models"))
+                        if (property.PropertyType.FullName != null && property.PropertyType.FullName.Contains("MyStore.Models"))
                         {
                             <option value="@(property.Name+".Count()")">@property.Name</option>
                         }
@@ -108,7 +108,7 @@
     }
 
     public void Sort(ChangeEventArgs e){
-        SelectedSort = e.Value as string;
+        SelectedSort = e.Value as string ?? "CategoryId";
 
         if (SelectedSort.Contains("."))
         {
@@ -121,18 +121,18 @@
                 {
                     temp[1] = "get_Count";
                 }
-                CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(temp[0]).GetValue(c).GetType().GetMethod(temp[1]).
-                                    Invoke(c.GetType().GetProperty(temp[0]).GetValue(c), null));
+                CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(temp[0])?.GetValue(c)?.GetType().GetMethod(temp[1])?.
+                                    Invoke(c.GetType().GetProperty(temp[0])?.GetValue(c), null));
             }
             else
             {
-                CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(temp[0]).GetValue(c).GetType().GetProperty(temp[1]).
-                                                            GetValue(c.GetType().GetProperty(temp[0]).GetValue(c)));
+                CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(temp[0])?.GetValue(c)?.GetType().GetProperty(temp[1])?.
+                                                            GetValue(c.GetType().GetProperty(temp[0])?.GetValue(c)));
             }
         }
         else
         {
-            CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(e.Value.ToString()).GetValue(c));
+            CategoriesData = CategoriesData.OrderBy(c => c.GetType().GetProperty(e.Value?.ToString() ?? "ProductId")?.GetValue(c));
         }
     }
 

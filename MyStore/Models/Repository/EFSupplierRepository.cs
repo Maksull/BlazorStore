@@ -2,7 +2,7 @@
 {
     public class EFSupplierRepository : ISupplierRepository
     {
-        private MyStoreDataContext _context;
+        private readonly MyStoreDataContext _context;
 
         public EFSupplierRepository(MyStoreDataContext context)
         {

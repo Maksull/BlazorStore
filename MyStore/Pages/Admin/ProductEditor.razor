@@ -1,11 +1,13 @@
 ﻿@page "/admin/products/edit/{id:long}"
 @page "/admin/products/create"
+@inherits OwningComponentBase<IStoreRepository>
 
 <style>
     div.validation-message { color: rgb(220, 53, 69); font-weight: 500 }
 </style>
 
-@if(Product != null){
+@if(Product != null)
+{
     <h3 class="bg-@ThemeColor text-white text-center p-1">@TitleText a Product</h3>
     <EditForm Model="Product" OnValidSubmit="SaveProduct">
         <DataAnnotationsValidator />
@@ -62,13 +64,14 @@
             <NavLink class="btn btn-secondary" href="/admin/products">Cancel</NavLink>
         </div>
     </EditForm>
-}else {
+}
+else 
+{
     <h1 class="bg-danger text-white text-center p-1">There is no Product with Id @Id</h1>
 }
 
 @code {
-    [Inject]
-    private MyStoreDataContext _context { get; set; }
+    private IStoreRepository _repository => Service;
 
     [Inject]
     public NavigationManager? NavigationManager {get; set;}
@@ -84,20 +87,22 @@
     protected override void OnParametersSet()
     {
         if(Id != 0){
-            Product = _context.Products.Include(p => p.Category).Include(p => p.Supplier).FirstOrDefault(p => p.ProductId == Id);
+            Product = _repository.Products.Include(p => p.Category).Include(p => p.Supplier).FirstOrDefault(p => p.ProductId == Id);
         }
-        Categories = _context.Categories.ToList();
-        Suppliers = _context.Suppliers.ToList();
+        Categories = _repository.Categories.ToList();
+        Suppliers = _repository.Suppliers.ToList();
     }
 
     public void SaveProduct()
     {
-        if(Id == 0){
-            _context.Products.Add(Product);
+        if(Product != null){
+            if(Id == 0){
+                _repository.CreateProduct(Product);
+            }
+            _repository.SaveProduct(Product);
+
+            NavigationManager?.NavigateTo("/admin/products");
         }
-        _context.SaveChanges();
-        
-        NavigationManager?.NavigateTo("/admin/products");
     }
 
     public string ThemeColor => Id == 0 ? "primary" : "warning";

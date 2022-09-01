@@ -39,7 +39,7 @@ namespace MyStore.Tests
                 new Product { ProductId = 1, Name = "First" }
             }).AsQueryable());
 
-            Cart cart = new Cart();
+            Cart cart = new();
 
 
             //Action

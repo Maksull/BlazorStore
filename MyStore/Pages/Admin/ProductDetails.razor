@@ -1,4 +1,5 @@
 ﻿@page "/admin/products/details/{id:long}"
+@inherits OwningComponentBase<IProductRepository>
 
 @if(Product != null){
     <table class="table table-sm table-bordered table-striped">
@@ -17,11 +18,11 @@
             </tr>
             <tr>
                 <th>Category</th>
-                <td>@Product?.Category.Name</td>
+                <td>@Product?.Category?.Name</td>
             </tr>
             <tr>
                 <th>Supplier</th>
-                <td>@Product?.Supplier.Name</td>
+                <td>@Product?.Supplier?.Name</td>
             </tr>
             <tr>
                 <th>Price</th>
@@ -30,7 +31,7 @@
         </tbody>
     </table>
 }else {
-        <h1 class="bg-danger text-white text-center p-1">There is no Product with Id @Id</h1>
+    <h1 class="bg-danger text-white text-center p-1">There is no Product with Id @Id</h1>
 }
 
 
@@ -38,8 +39,7 @@
 <NavLink class="btn btn-secondary" href="/admin/products">Back</NavLink>
 
 @code {
-    [Inject]
-    private IProductRepository _repository { get; set; }
+    private IProductRepository _repository => Service;
 
     [Parameter]
     public long Id { get; set; }

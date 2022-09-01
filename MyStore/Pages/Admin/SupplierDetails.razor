@@ -1,4 +1,5 @@
 ﻿@page "/admin/suppliers/details/{id:long}"
+@inherits OwningComponentBase<ISupplierRepository>
 
 @if (Supplier != null)
 {
@@ -12,8 +13,8 @@
                     <tr>
                         <td>@p.ProductId</td>
                         <td>@p.Name</td>
-                        <td>@p.Category.Name</td>
-                        <td>@p.Supplier.Name</td>
+                        <td>@p.Category?.Name</td>
+                        <td>@p.Supplier?.Name</td>
                         <td>@p.Price.ToString("c")</td>
                     </tr>
                 }
@@ -37,8 +38,7 @@ else
 
 
 @code {
-    [Inject]
-    private ISupplierRepository _repository { get; set; }
+    private ISupplierRepository _repository => Service;
 
     [Parameter]
     public long Id { get; set; }
@@ -47,7 +47,7 @@ else
 
     protected override void OnParametersSet()
     {
-        Supplier = _repository.Suppliers.Include(c => c.Products).ThenInclude(p => p.Category).FirstOrDefault(c => c.SupplierId == Id);
+        Supplier = _repository.Suppliers?.Include(c => c.Products)!.ThenInclude(p => p.Category).FirstOrDefault(c => c.SupplierId == Id);
     }
 
     public string GetEditUrl => $"/admin/suppliers/edit/{Id}";

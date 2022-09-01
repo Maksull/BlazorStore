@@ -1,4 +1,5 @@
 ﻿@page "/admin/categories/details/{id:long}"
+@inherits OwningComponentBase<ICategoryRepository>
 
 @if(Category != null){
     <h1 class="bg-secondary text-white text-center p-1">@Category?.Name</h1>
@@ -11,8 +12,8 @@
                     <tr>
                         <td>@p.ProductId</td>
                         <td>@p.Name</td>
-                        <td>@p.Category.Name</td>
-                        <td>@p.Supplier.Name</td>
+                        <td>@p.Category?.Name</td>
+                        <td>@p.Supplier?.Name</td>
                         <td>@p.Price.ToString("c")</td>
                     </tr>
                 }
@@ -35,8 +36,7 @@ else {
 
 
 @code {
-    [Inject]
-    private ICategoryRepository _repository { get; set; }
+    private ICategoryRepository _repository => Service;
 
     [Parameter]
     public long Id { get; set; }
@@ -45,7 +45,7 @@ else {
 
     protected override void OnParametersSet()
     {
-        Category = _repository.Categories.Include(c => c.Products).ThenInclude(p => p.Supplier).FirstOrDefault(c => c.CategoryId == Id);
+        Category = _repository.Categories?.Include(c => c.Products)!.ThenInclude(p => p.Supplier).FirstOrDefault(c => c.CategoryId == Id);
     }
 
     public string GetEditUrl => $"/admin/categories/edit/{Id}";

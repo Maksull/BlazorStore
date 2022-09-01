@@ -2,7 +2,7 @@
 {
     public class EFCategoryRepository : ICategoryRepository
     {
-        private MyStoreDataContext _context;
+        private readonly MyStoreDataContext _context;
 
         public EFCategoryRepository(MyStoreDataContext context)
         {

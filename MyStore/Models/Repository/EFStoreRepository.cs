@@ -1,15 +1,21 @@
-﻿namespace MyStore.Models.Repository
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace MyStore.Models.Repository
 {
-    public class EFProductRepository : IProductRepository
+    public class EFStoreRepository : IStoreRepository
     {
         private readonly MyStoreDataContext _context;
 
-        public EFProductRepository(MyStoreDataContext context)
+        public EFStoreRepository(MyStoreDataContext context)
         {
             _context = context;
         }
 
         public IQueryable<Product> Products => _context.Products;
+
+        public IQueryable<Supplier> Suppliers => _context.Suppliers;
+
+        public IQueryable<Category> Categories => _context.Categories;
 
         public async Task CreateProduct(Product product)
         {
@@ -25,7 +31,7 @@
 
         public async Task SaveProduct(Product product)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); ;
         }
     }
 }

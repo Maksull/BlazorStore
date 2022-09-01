@@ -8,7 +8,7 @@
                 <small>@Model?.Price.ToString("c")</small>
             </span>
         </h4>
-        <h6 class="mb-1">@Model?.Category.Name | @Model?.Supplier.Name</h6>
+        <h6 class="mb-1">@Model?.Category?.Name | @Model?.Supplier?.Name</h6>
     </div>
 
     <form id="@Model?.ProductId" asp-page="/Cart" method="post">

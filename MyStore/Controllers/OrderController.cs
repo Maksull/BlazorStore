@@ -7,8 +7,8 @@ namespace MyStore.Controllers
 {
     public class OrderController : Controller
     {
-        private IOrderRepository _repository;
-        private Cart _cart;
+        private readonly IOrderRepository _repository;
+        private readonly Cart _cart;
 
         public OrderController(IOrderRepository repository, Cart cart)
         {

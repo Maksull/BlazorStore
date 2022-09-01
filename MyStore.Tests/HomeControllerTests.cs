@@ -8,11 +8,11 @@
             //Arrange
             Mock<IProductRepository> mock = new();
 
-            Category category1 = new Category
+            Category category1 = new()
             {
                 Name = "One"
             };
-            Category category2 = new Category
+            Category category2 = new()
             {
                 Name = "Two"
             };
@@ -44,7 +44,7 @@
         {
             //Arrange
             Mock<IProductRepository> mock = new();
-            Category category1 = new Category
+            Category category1 = new()
             {
                 Name = "One"
             };
@@ -72,7 +72,7 @@
         {
             //Arrange
             Mock<IProductRepository> mock = new();
-            Category category1 = new Category
+            Category category1 = new()
             {
                 Name = "One"
             };
@@ -113,11 +113,11 @@
             //Arrange
             Mock<IProductRepository> mock = new();
 
-            Category category1 = new Category
+            Category category1 = new()
             {
                 Name = "One"
             };
-            Category category2 = new Category
+            Category category2 = new()
             {
                 Name = "Two"
             };

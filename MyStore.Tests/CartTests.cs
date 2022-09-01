@@ -72,7 +72,7 @@
             Product p1 = new() { ProductId = 1, Name = "First", Price = 100M };
             Product p2 = new() { ProductId = 2, Name = "Second", Price = 50M };
 
-            Cart cart = new Cart();
+            Cart cart = new();
 
             //Action
             cart.AddItem(p1, 2);

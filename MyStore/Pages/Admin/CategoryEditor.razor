@@ -1,5 +1,6 @@
 ﻿@page "/admin/categories/edit/{id:long}"
 @page "/admin/categories/create"
+@inherits OwningComponentBase<ICategoryRepository>
 
 <style>
     div.validation-message {
@@ -35,11 +36,10 @@
 }
 
 @code {
-    [Inject]
-    private ICategoryRepository _repository { get; set; }
+    private ICategoryRepository _repository => Service;
 
     [Inject]
-    public NavigationManager NavigationManager {get; set;}
+    public NavigationManager? NavigationManager {get; set;}
 
     [Parameter]
     public long Id { get; set; } = 0;
@@ -53,13 +53,18 @@
         }
     }
 
-    public void SaveCategory(){
-        if(Id == 0){
-            _repository.CreateCategory(Category);
-        }
-        _repository.SaveCategory(Category);
+    public void SaveCategory()
+    {
+        if (Category != null)
+        {
+            if (Id == 0)
+            {
+                _repository.CreateCategory(Category);
+            }
+            _repository.SaveCategory(Category);
 
-        NavigationManager.NavigateTo("/admin/categories");
+            NavigationManager?.NavigateTo("/admin/categories");
+        }
     }
 
     public string ThemeColor => Id == 0 ? "primary" : "warning";

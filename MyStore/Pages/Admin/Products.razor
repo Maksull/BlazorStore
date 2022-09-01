@@ -1,7 +1,6 @@
 ﻿@page "/admin"
 @page "/admin/products"
-@using Microsoft.AspNetCore.Mvc
-@inherits OwningComponentBase<IProductRepository>
+@inherits OwningComponentBase<IStoreRepository>
 
 <div class="mb-1">
     <form class="form-inline" @onsubmit="Search">
@@ -37,8 +36,8 @@
                     <td>@p.ProductId</td>
                     <td>@p.Name</td>
                     <td>@p.Description</td>
-                    <td>@p.Category.Name</td>
-                    <td>@p.Supplier.Name</td>
+                    <td>@p.Category?.Name</td>
+                    <td>@p.Supplier?.Name</td>
                     <td>@p.Price.ToString("c")</td>
                     <td>
                         <NavLink class="btn btn-info btn-sm" href="@GetDetailsUrl(p.ProductId)">
@@ -103,14 +102,13 @@
                     <option value="ProductId">Nothing</option>
                     @foreach (var property in ProductProperties)
                     {
-                        if (property.PropertyType.FullName.Contains("MyStore.Models"))
+                        if (property.PropertyType.FullName != null && property.PropertyType.FullName.Contains("MyStore.Models"))
                         {
                             <option value="@(property.Name+".Name")">@property.Name</option>
                         }
                         else
                         {
                             <option value="@property.Name">@property.Name</option>
-
                         }
                     }
                 </select>
@@ -123,8 +121,7 @@
 <NavLink class="btn btn-primary" href="/admin/products/create">Create</NavLink>
 
 @code {
-    [Inject]
-    private MyStoreDataContext _context { get; set; }
+    private IStoreRepository _repository => Service;
 
     public IEnumerable<Product> ProductsData { get; set; } = Enumerable.Empty<Product>();
 
@@ -137,6 +134,7 @@
     public string SelectedSearch { get; set; } = string.Empty;
 
     public List<PropertyInfo> ProductProperties { get; set; } = new();
+
     protected async override Task OnInitializedAsync()
     {
         ProductProperties = new Product().GetType().GetProperties().ToList();
@@ -147,16 +145,15 @@
 
     public async Task UpdateData()
     {
-        ProductsData = _context.Products.Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).ToList();
+        ProductsData = await _repository.Products.Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).ToListAsync();
 
-        Categories = _context.Categories.ToList();
-        Suppliers = _context.Suppliers.ToList();
+        Categories = await _repository.Categories.ToListAsync();
+        Suppliers = await _repository.Suppliers.ToListAsync();
     }
 
     public async Task DeleteProduct(Product p)
     {
-        _context.Products.Remove(p);
-        await _context.SaveChangesAsync();
+        await _repository.DeleteProduct(p);
         await UpdateData();
     }
 
@@ -179,20 +176,20 @@
         return "";
     }
 
-    public async void Sort(ChangeEventArgs e)
+    public void Sort(ChangeEventArgs e)
     {
-        SelectedSort = e.Value as string;
+        SelectedSort = e.Value as string ?? "ProductId";
 
         if (SelectedSort.Contains("."))
         {
             var temp = SelectedSort.Split(new char[] { '.' }, 2);
 
-            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(temp[0]).GetValue(p).GetType().GetProperty(temp[1]).
-                                                            GetValue(p.GetType().GetProperty(temp[0]).GetValue(p)));
+            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(temp[0])?.GetValue(p)?.GetType().GetProperty(temp[1])?.
+                                                            GetValue(p.GetType().GetProperty(temp[0])?.GetValue(p)));
         }
         else
         {
-            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(e.Value.ToString()).GetValue(p));
+            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(e.Value?.ToString() ?? "ProductId")?.GetValue(p));
         }
     }
 

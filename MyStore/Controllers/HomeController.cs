@@ -7,7 +7,7 @@ namespace MyStore.Controllers
 {
     public class HomeController : Controller
     {
-        private IProductRepository _repository;
+        private readonly IProductRepository _repository;
 
         public HomeController(IProductRepository repository)
         {
@@ -19,13 +19,13 @@ namespace MyStore.Controllers
         {
             return View(new ProductsListViewModel
             {
-                Products = _repository.Products.Where(p => p.Category.Name == category || category == null).Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).
+                Products = _repository.Products.Where(p => p.Category != null && p.Category.Name == category || category == null).Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).
                                 Skip((productPage - 1) * PageSize).Take(PageSize),
                 PagingInfo =
                 {
                     CurrentPage = productPage,
                     ItemsPerPage = PageSize,
-                    TotalItems = category == null ? _repository.Products.Count() :  _repository.Products.Where(p => p.Category.Name == category).Count()
+                    TotalItems = category == null ? _repository.Products.Count() :  _repository.Products.Where(p => p.Category != null  && p.Category.Name == category).Count()
                 },
                 CurrentCategory = category
             });

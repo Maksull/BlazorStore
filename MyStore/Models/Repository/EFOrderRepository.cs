@@ -4,7 +4,7 @@ namespace MyStore.Models.Repository
 {
     public class EFOrderRepository : IOrderRepository
     {
-        private MyStoreDataContext _context;
+        private readonly MyStoreDataContext _context;
 
         public EFOrderRepository(MyStoreDataContext context)
         {

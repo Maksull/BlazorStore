@@ -21,7 +21,7 @@ namespace MyStore.Tests
             urlHelperFactory.Setup(f => f.GetUrlHelper(It.IsAny<ActionContext>())).Returns(urlHelper.Object);
 
             Mock<ViewContext> viewContext = new();
-            PageLinkTagHelper helper = new PageLinkTagHelper(urlHelperFactory.Object)
+            PageLinkTagHelper helper = new(urlHelperFactory.Object)
             {
                 PagingInfo = new PagingInfo
                 {
