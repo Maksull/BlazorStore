@@ -1,5 +1,18 @@
 ﻿@model ProductsListViewModel
 
+<div class="mb-1">
+    <form class="form-inline" asp-action="Index">
+        <div class="input-group mb-2 mr-sm-2">
+            <input name="searchBy" type="text" class="form-control" placeholder="Search" />
+            <div class="input-group-prepend">
+                <div class="input-group">
+                    <button type="submit" class="btn btn-secondary">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 @foreach (var p in Model.Products ?? Enumerable.Empty<Product>()) {
     <partial name="ProductSummary" model="p"/>
 }
@@ -8,4 +21,32 @@
     page-classes-enabled="true" page-class="btn" page-class-normal="btn-outline-dark"
     page-class-selected="btn-primary" page-url-category="@Model?.CurrentCategory!" 
     class="btn-group pull-right m-1">
+</div>
+
+<div class="container-fluid px-0 mb-2">
+    <div class="row">
+        <div class="col">
+            <form asp-action="Index">
+                <div class="form-group">
+                    <label>Sort by</label>
+                    <select name="sortBy" class="form-control">
+                        <option selected disabled value="0">Choose a property</option>
+                        <option value="ProductId">Nothing</option>
+                        @foreach (var property in @Model?.ProductProperties ?? new())
+                        {
+                            if (property.PropertyType.FullName != null && property.PropertyType.FullName.Contains("MyStore.Models"))
+                            {
+                                <option value="@(property.Name+".Name")">@property.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@property.Name">@property.Name</option>
+                            }
+                        }
+                    </select>
+                    <button type="submit" class="container-fluid btn btn-secondary">Sort</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

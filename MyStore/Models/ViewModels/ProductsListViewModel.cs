@@ -1,4 +1,6 @@
-﻿namespace MyStore.Models.ViewModels
+﻿using System.Reflection;
+
+namespace MyStore.Models.ViewModels
 {
     public class ProductsListViewModel
     {
@@ -6,5 +8,6 @@
         public PagingInfo PagingInfo { get; set; } = new();
 
         public string? CurrentCategory { get; set; }
+        public List<PropertyInfo> ProductProperties { get; set; } = new();
     }
 }
