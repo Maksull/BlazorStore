@@ -137,8 +137,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        ProductProperties = new Product().GetType().GetProperties().ToList();
-        ProductProperties.RemoveAll(p => p.Name.Contains("Id"));
+        ProductProperties = new Product().GetType().GetProperties().Where(p => !p.Name.Contains("Id")).ToList();
 
         await UpdateData();
     }

@@ -10,7 +10,7 @@ namespace MyStore.Controllers
     public class HomeController : Controller
     {
         private readonly IProductRepository _repository;
-        private List<PropertyInfo> _productProperties => new Product().GetType().GetProperties().ToList();
+        private List<PropertyInfo> _productProperties => new Product().GetType().GetProperties().Where(p => !p.Name.Contains("Id")).ToList();
         private IEnumerable<Product> _productsData { get; set; } = Enumerable.Empty<Product>();
 
 
@@ -25,7 +25,8 @@ namespace MyStore.Controllers
         {
             int totalItems = default;
 
-            _productsData = _repository.Products.Where(p => p.Category != null && p.Category.Name == category || category == null).Include(p => p.Category).Include(p => p.Supplier);
+            _productsData = _repository.Products.Where(p => p.Category != null && p.Category.Name == category || category == null).
+                                Include(p => p.Category).Include(p => p.Supplier);
 
             if(category == null && searchBy == null)
             {
@@ -44,12 +45,27 @@ namespace MyStore.Controllers
                 totalItems = _productsData.Where(p => p.Name.Contains(searchBy ?? "")).Count();
             }
 
+            if (sortBy.Contains("."))
+            {
+                var temp = sortBy.Split(new char[] { '.' }, 2);
+
+                _productsData = _productsData.Where(p => p.Name.Contains(searchBy ?? "")).OrderBy(p => p.GetType().GetProperty(temp[0])!.GetValue(p)?.GetType().GetProperty(temp[1])?.
+                                                                GetValue(p.GetType().GetProperty(temp[0])?.GetValue(p))).
+                                                                Skip((productPage - 1) * PageSize).Take(PageSize);
+            }
+            else
+            {
+                _productsData = _productsData.Where(p => p.Name.Contains(searchBy ?? "")).OrderBy(p => p.GetType().GetProperty(sortBy)!.GetValue(p)).
+                                            Skip((productPage - 1) * PageSize).Take(PageSize);
+            }
+
             return View(new ProductsListViewModel
             {
                 /*Products = _repository.Products.Where(p => p.Category != null && p.Category.Name == category || category == null).Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).
                                 Skip((productPage - 1) * PageSize).Take(PageSize),*/
-                Products = _productsData.Where(p => p.Name.Contains(searchBy ?? "")).OrderBy(p => p.GetType().GetProperty(sortBy)!.GetValue(p)).
-                                Skip((productPage - 1) * PageSize).Take(PageSize),
+                /*Products = _productsData.Where(p => p.Name.Contains(searchBy ?? "")).OrderBy(p => p.GetType().GetProperty(sortBy)!.GetValue(p)).
+                                Skip((productPage - 1) * PageSize).Take(PageSize),*/
+                Products = _productsData,
                 ProductProperties = _productProperties,
                 PagingInfo =
                 {
@@ -58,7 +74,9 @@ namespace MyStore.Controllers
                     //TotalItems = category == null ? _repository.Products.Count() :  _repository.Products.Where(p => p.Category != null  && p.Category.Name == category).Count()
                     TotalItems = totalItems
                 },
-                CurrentCategory = category
+                CurrentCategory = category,
+                SortBy = sortBy,
+                SearchBy = searchBy
             });
         }
     }

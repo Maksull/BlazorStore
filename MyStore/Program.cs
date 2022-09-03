@@ -62,6 +62,42 @@ app.MapFallbackToPage("/admin/{*catchall}", "/admin/index");
 
 app.MapRazorPages();
 
+
+
+app.MapControllerRoute(
+    name: "categorySortAndSearch",
+    pattern: "{category}/Page{productPage:int}/SortBy{sortBy}/SearchBy{searchBy}",
+    defaults: new { Controller = "Home", Action = "Index" });
+
+app.MapControllerRoute(
+    name: "categorySort",
+    pattern: "{category}/Page{productPage:int}/SortBy{sortBy}",
+    defaults: new { Controller = "Home", Action = "Index" });
+
+app.MapControllerRoute(
+    name: "categorySearch",
+    pattern: "{category}/Page{productPage:int}/SearchBy{searchBy}",
+    defaults: new { Controller = "Home", Action = "Index" });
+
+
+
+app.MapControllerRoute(
+    name: "sortAndSearch",
+    pattern: "Page{productPage:int}/SortBy{sortBy}/SearchBy{searchBy}",
+    defaults: new { Controller = "Home", Action = "Index" });
+
+app.MapControllerRoute(
+    name: "sort",
+    pattern: "Page{productPage:int}/SortBy{sortBy}",
+    defaults: new { Controller = "Home", Action = "Index" });
+
+app.MapControllerRoute(
+    name: "search",
+    pattern: "Page{productPage:int}/SearchBy{searchBy}",
+    defaults: new { Controller = "Home", Action = "Index" });
+
+
+
 app.MapControllerRoute(
     name: "categoryPage",
     pattern: "{category}/Page{productPage:int}",

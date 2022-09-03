@@ -8,6 +8,8 @@ namespace MyStore.Models.ViewModels
         public PagingInfo PagingInfo { get; set; } = new();
 
         public string? CurrentCategory { get; set; }
+        public string? SortBy { get; set; }
+        public string? SearchBy { get; set; }
         public List<PropertyInfo> ProductProperties { get; set; } = new();
     }
 }

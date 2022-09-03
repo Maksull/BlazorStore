@@ -2,13 +2,14 @@
 
 <div class="card card-outline-primary m-1 p-1">
     <div class="bg-faded p-1">
-        <h4>
-            @Model?.ProductId // @Model?.Name
+        <h4 class="mb-0">
+            @Model?.Name
             <span class="badge rounded-pill bg-primary text-white" style="float:right">
                 <small>@Model?.Price.ToString("c")</small>
             </span>
         </h4>
-        <h6 class="mb-1">@Model?.Category?.Name | @Model?.Supplier?.Name</h6>
+        <h6 class="mb-0 text-grey"><small>ID: @Model?.ProductId</small></h6>
+        <h6 class="mb-0">@Model?.Category?.Name | @Model?.Supplier?.Name</h6>
     </div>
 
     <form id="@Model?.ProductId" asp-page="/Cart" method="post">
