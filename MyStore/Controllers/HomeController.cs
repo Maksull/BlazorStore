@@ -61,17 +61,12 @@ namespace MyStore.Controllers
 
             return View(new ProductsListViewModel
             {
-                /*Products = _repository.Products.Where(p => p.Category != null && p.Category.Name == category || category == null).Include(p => p.Category).Include(p => p.Supplier).OrderBy(p => p.ProductId).
-                                Skip((productPage - 1) * PageSize).Take(PageSize),*/
-                /*Products = _productsData.Where(p => p.Name.Contains(searchBy ?? "")).OrderBy(p => p.GetType().GetProperty(sortBy)!.GetValue(p)).
-                                Skip((productPage - 1) * PageSize).Take(PageSize),*/
                 Products = _productsData,
                 ProductProperties = _productProperties,
                 PagingInfo =
                 {
                     CurrentPage = productPage,
                     ItemsPerPage = PageSize,
-                    //TotalItems = category == null ? _repository.Products.Count() :  _repository.Products.Where(p => p.Category != null  && p.Category.Name == category).Count()
                     TotalItems = totalItems
                 },
                 CurrentCategory = category,

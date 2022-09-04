@@ -73,6 +73,10 @@ namespace MyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("OrderId"), 1L, 1);
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -81,15 +85,12 @@ namespace MyStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("GiftWrap")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Line1")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Line2")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("GiftWrap")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -18,12 +18,12 @@
 <table class="table table-sm table-striped table-bordered">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Supplier</th>
-            <th>Price</th>
+            <th style="text-decoration: underline;" @onclick="@(() => SortBy("ProductId"))">ID</th>
+            <th style="text-decoration: underline;" @onclick="@(() => SortBy("Name"))">Name</th>
+            <th style="text-decoration: underline;" @onclick="@(() => SortBy("Description"))">Description</th>
+            <th style="text-decoration: underline;" @onclick="@(() => SortBy("Category.Name"))">Category</th>
+            <th style="text-decoration: underline;" @onclick="@(() => SortBy("Supplier.Name"))">Supplier</th>
+            <th style="text-decoration: underline;" @onclick="@(() => SortBy("Price"))">Price</th>
             <td />
         </tr>
     </thead>
@@ -195,5 +195,19 @@
     public void Search()
     {
         ProductsData = ProductsData.Where(p => p.Name.Contains(SelectedSearch));
+    }
+
+    public void SortBy(string sortBy){
+        if (sortBy.Contains("."))
+        {
+            var temp = sortBy.Split(new char[] { '.' }, 2);
+
+            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(temp[0])?.GetValue(p)?.GetType().GetProperty(temp[1])?.
+                                                            GetValue(p.GetType().GetProperty(temp[0])?.GetValue(p)));
+        }
+        else
+        {
+            ProductsData = ProductsData.OrderBy(p => p.GetType().GetProperty(sortBy)?.GetValue(p));
+        }
     }
 }

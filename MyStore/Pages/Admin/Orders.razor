@@ -14,6 +14,7 @@
             {
                 <tr>
                     <td>@o.Name</td>
+                    <td>@o.Address</td>
                     <td>@o.Zip</td>
                     <th>Product</th>
                     <th>Quantity</th>
@@ -26,7 +27,7 @@
                 @foreach (CartLine line in o.Lines)
                 {
                     <tr>
-                        <td colspan="2"></td>
+                        <td colspan="3"></td>
                         <td>@line.Product.Name</td>
                         <td>@line.Quantity</td>
                         <td></td>
